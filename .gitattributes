@@ -1,0 +1,18 @@
+# Normalizar fin de linea segun plataforma
+* text=auto
+
+# Scripts de shell siempre LF (agentes Linux de Jenkins)
+mvnw text eol=lf
+*.sh text eol=lf
+
+# Scripts de Windows siempre CRLF
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# Binarios
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.jar binary
+*.docx binary
