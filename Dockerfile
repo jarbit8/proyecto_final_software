@@ -1,0 +1,18 @@
+# Etapa 1: build con maven
+FROM maven:3.9-eclipse-temurin-11 AS build
+WORKDIR /app
+
+COPY pom.xml .
+RUN mvn -B -q dependency:go-offline || true
+
+COPY backend ./backend
+RUN mvn -B -DskipTests package
+
+# Etapa 2: runtime
+FROM eclipse-temurin:11-jre
+WORKDIR /app
+
+COPY --from=build /app/target/*.jar app.jar
+
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "app.jar"]

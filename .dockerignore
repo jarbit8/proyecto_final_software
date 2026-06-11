@@ -1,0 +1,11 @@
+.git
+.idea
+*.iml
+target
+node_modules
+build
+diagrams
+docs
+jmeter
+zap
+*.docx
