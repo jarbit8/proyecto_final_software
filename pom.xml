@@ -22,6 +22,9 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
 
+        <!-- el BOM de spring-boot 2.2 fija selenium 3.x, se fuerza la version 4 -->
+        <selenium.version>4.16.1</selenium.version>
+
         <!-- SonarQube -->
         <sonar.projectKey>proyecto_final_software</sonar.projectKey>
         <sonar.projectName>Proyecto Final Software - Personal Finance Management</sonar.projectName>
@@ -128,6 +131,14 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Pruebas funcionales (UI) -->
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-java</artifactId>
+            <version>4.16.1</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -174,6 +185,9 @@
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.22.2</version>
+                <configuration>
+                    <excludedGroups>functional</excludedGroups>
+                </configuration>
             </plugin>
 
             <!-- TODO 4: Plugin de Code Coverage → JaCoCo -->
@@ -219,5 +233,24 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!-- Pruebas funcionales: ./mvnw -Pfunctional-tests test -->
+        <profile>
+            <id>functional-tests</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>2.22.2</version>
+                        <configuration>
+                            <groups>functional</groups>
+                            <excludedGroups combine.self="override"/>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>
