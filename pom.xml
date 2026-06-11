@@ -21,6 +21,16 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
+
+        <!-- el BOM de spring-boot 2.2 fija selenium 3.x, se fuerza la version 4 -->
+        <selenium.version>4.16.1</selenium.version>
+
+        <!-- SonarQube -->
+        <sonar.projectKey>proyecto_final_software</sonar.projectKey>
+        <sonar.projectName>Proyecto Final Software - Personal Finance Management</sonar.projectName>
+        <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.junit.reportPaths>${project.build.directory}/surefire-reports</sonar.junit.reportPaths>
+        <sonar.sourceEncoding>UTF-8</sonar.sourceEncoding>
     </properties>
 
     <dependencies>
@@ -58,6 +68,11 @@
             <artifactId>lombok</artifactId>
             <version>1.18.30</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-ui</artifactId>
+            <version>1.6.14</version>
         </dependency>
 
         <!-- ========== TESTS ========== -->
@@ -116,6 +131,14 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Pruebas funcionales (UI) -->
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-java</artifactId>
+            <version>4.16.1</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -162,6 +185,9 @@
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.22.2</version>
+                <configuration>
+                    <excludedGroups>functional</excludedGroups>
+                </configuration>
             </plugin>
 
             <!-- TODO 4: Plugin de Code Coverage → JaCoCo -->
@@ -187,6 +213,12 @@
             </plugin>
 
             <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>3.9.1.2184</version>
+            </plugin>
+
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.2.0</version>
@@ -201,5 +233,71 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!-- Pruebas funcionales: ./mvnw -Pfunctional-tests test -->
+        <profile>
+            <id>functional-tests</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>2.22.2</version>
+                        <configuration>
+                            <groups>functional</groups>
+                            <excludedGroups combine.self="override"/>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Pruebas de performance: ./mvnw -Pperformance-tests -DskipTests verify -->
+        <profile>
+            <id>performance-tests</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.lazerycode.jmeter</groupId>
+                        <artifactId>jmeter-maven-plugin</artifactId>
+                        <version>3.7.0</version>
+                        <configuration>
+                            <testFilesDirectory>${project.basedir}/jmeter</testFilesDirectory>
+                            <resultsFileFormat>csv</resultsFileFormat>
+                            <generateReports>true</generateReports>
+                            <propertiesUser>
+                                <host>${jmeter.target.host}</host>
+                                <port>${jmeter.target.port}</port>
+                            </propertiesUser>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>configuration</id>
+                                <goals>
+                                    <goal>configure</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>performance-test</id>
+                                <goals>
+                                    <goal>jmeter</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>check-results</id>
+                                <goals>
+                                    <goal>results</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+            <properties>
+                <jmeter.target.host>localhost</jmeter.target.host>
+                <jmeter.target.port>8080</jmeter.target.port>
+            </properties>
+        </profile>
+    </profiles>
 
 </project>
